@@ -1,0 +1,41 @@
+.statistics-container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    max-width: 900px;
+  }
+  
+  .chart-container {
+    margin-top: 20px;
+  }
+  
+  .table-container {
+    margin-top: 30px;
+    overflow-x: auto;  // Add horizontal scrolling for large tables
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  th {
+    background-color: #f4f4f4;
+  }
+  
+  tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  canvas {
+    display: block;
+    margin: 0 auto;
+    max-height: 400px;
+  }
+  

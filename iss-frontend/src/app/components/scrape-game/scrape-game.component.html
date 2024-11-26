@@ -1,0 +1,13 @@
+<h2>Scrape a New Game</h2>
+<input type="text" [(ngModel)]="gameUrl" placeholder="Enter game URL" />
+<button (click)="onScrapeGame()">Scrape Game</button>
+
+<div *ngIf="scrapedGame">
+  <h3>Scraped Game Details</h3>
+  <p><strong>Title:</strong> {{ scrapedGame.title }}</p>
+  <!-- <p><strong>Category:</strong> {{ scrapedGame.category }}</p> -->
+  <p><strong>Rating:</strong> {{ scrapedGame.rating }}</p>
+  <p><strong>Genre:</strong> {{ scrapedGame.genre.toString() }}</p>
+  <p><strong>Description:</strong> {{ scrapedGame.description }}</p>
+  <!-- <p><strong>Release Date:</strong> {{ scrapedGame?.releaseDate | date }}</p> -->
+</div>

@@ -1,0 +1,17 @@
+<h2>Game List</h2>
+<table>
+  <tr>
+    <th>Title</th>
+    <th>Genre</th>
+    <th>Rating</th>
+    <th>Description</th>
+    <th>Release Date</th>
+  </tr>
+  <tr *ngFor="let game of games">
+    <td>{{ game.title }}</td>
+    <td>{{ game.genre.toString() }}</td>
+    <td>{{ game.rating }}</td>
+    <td>{{ game.description }}</td>
+    <td>{{ game.releaseDate | date }}</td>
+  </tr>
+</table>

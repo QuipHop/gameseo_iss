@@ -1,0 +1,38 @@
+<div class="statistics-container">
+    <h2>Top 500 Keywords</h2>
+  
+    <!-- Display the bar chart if there are top keywords -->
+    <div *ngIf="topKeywords.length > 0">
+      <div class="chart-container">
+        <canvas baseChart
+                [data]="chartData"
+                [options]="chartOptions"
+                chartType="bar">
+        </canvas>
+      </div>
+    
+      <!-- Display the table below the chart -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Keyword</th>
+              <th>Count of Games</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let keyword of topKeywords">
+              <td>{{ keyword.term }}</td>
+              <td>{{ keyword.count }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <!-- Show message if no data available -->
+    <div *ngIf="topKeywords.length === 0">
+      <p>No data available.</p>
+    </div>
+  </div>
+  

@@ -1,0 +1,39 @@
+.search-container {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: left;
+  
+    h2 {
+      text-align: center;
+    }
+  
+    form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+  
+      label {
+        flex: 1;
+      }
+  
+      button {
+        padding: 5px 10px;
+      }
+    }
+  
+    table {
+      width: 100%;
+      border-collapse: collapse;
+  
+      th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+  
+      th {
+        background-color: #f4f4f4;
+      }
+    }
+  }
+  

@@ -1,0 +1,11 @@
+<nav class="tabs">
+  <a class="tab" routerLink="/scrape" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Scrape Game</a>
+  <a class="tab" routerLink="/games" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Game List</a>
+  <a class="tab" routerLink="/search" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Search Games</a>
+  <a class="tab" routerLink="/statistics" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Statistics</a> <!-- New Tab -->
+</nav>
+
+<!-- Route Outlet -->
+<div class="content">
+  <router-outlet></router-outlet>
+</div>

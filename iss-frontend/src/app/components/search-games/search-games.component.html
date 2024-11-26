@@ -1,0 +1,43 @@
+<div class="search-container">
+    <h2>Search Games</h2>
+  
+    <!-- Search Form -->
+    <form (ngSubmit)="onSearch()">
+      <label>
+        Search:
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          name="query"
+          placeholder="Enter keywords..."
+        />
+      </label>
+      <button type="submit">Search</button>
+    </form>
+  
+    <!-- Search Results -->
+    <div *ngIf="searchResults && searchResults.length > 0">
+      <h3>Results:</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Genres</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let game of searchResults">
+            <td>{{ game.title }}</td>
+            <td>{{ game.description }}</td>
+            <td>{{ game.genre }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <div *ngIf="searchResults?.length === 0">
+      <p>No results found.</p>
+    </div>
+  </div>
+  
