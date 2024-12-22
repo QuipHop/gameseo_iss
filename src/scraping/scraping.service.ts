@@ -18,8 +18,9 @@ export class ScrapingService {
 
   // Helper function to validate and format the URL
   validateAndFormatUrl(url: string): string {
+    // Regex to match the base Google Play URL format
     const playStoreRegex =
-      /^https:\/\/play\.google\.com\/store\/apps\/details\?id=([a-zA-Z0-9._-]+)$/;
+      /^https:\/\/play\.google\.com\/store\/apps\/details\?id=([a-zA-Z0-9._-]+)(?:&.*)?$/;
 
     // Check if the URL matches the expected format
     const match = url.match(playStoreRegex);
@@ -29,15 +30,16 @@ export class ScrapingService {
       );
     }
 
-    // Extract the app ID from the URL
-    // const appId = match[1];
+    // Extract the base URL
+    const baseUrl = match[0]; // Full matched URL
 
-    // Ensure `hl=en` is present
-    if (!url.includes('&hl=en')) {
-      url += '&hl=en';
-    }
+    // Ensure `hl=en` parameter is present
+    const formattedUrl = baseUrl.includes('&hl=')
+      ? baseUrl // Keep as is if `hl` is already present
+      : `${baseUrl}&hl=en`;
 
-    return url;
+    console.log('Validated and formatted URL:', formattedUrl);
+    return formattedUrl;
   }
 
   // Search function
@@ -195,7 +197,7 @@ export class ScrapingService {
       const tokens = [
         ...advancedTokenizeContent(parsedData.title),
         ...advancedTokenizeContent(parsedData.description),
-        ...parsedData.genres, // Add genres directly as terms
+        ...parsedData.genres.map((genre) => genre.toLowerCase()), // Ensure genres are included
       ];
 
       for (const token of tokens) {
@@ -242,6 +244,44 @@ export class ScrapingService {
     LIMIT 500;
   `;
     return this.gameRepository.query(query); // Adjust for your ORM or raw query method
+  }
+
+  async getTopKeywordsByGenre(): Promise<
+    { genre: string; keywords: { term: string; count: number }[] }[]
+  > {
+    // Query to fetch top keywords grouped by genre
+    const query = `
+      SELECT
+        g.genre AS genre,
+        t.term AS term,
+        COUNT(*) AS count
+      FROM game_terms_term gtt
+      JOIN term t ON t.id = gtt.termId
+      JOIN game g ON g.id = gtt.gameId
+      WHERE g.genre IS NOT NULL
+      GROUP BY g.genre, t.term
+      ORDER BY g.genre, count DESC
+    `;
+
+    const results = await this.gameRepository.query(query);
+
+    // Transform the results into grouped data
+    const groupedResults = results.reduce((acc, row) => {
+      const genre = row.genre;
+      if (!acc[genre]) {
+        acc[genre] = [];
+      }
+      acc[genre].push({ term: row.term, count: parseInt(row.count, 10) });
+      return acc;
+    }, {});
+
+    // Limit to top 10 genres and top keywords per genre
+    return Object.entries(groupedResults)
+      .slice(0, 10) // Top 10 genres
+      .map(([genre, keywords]) => ({
+        genre,
+        keywords: (keywords as any[]).slice(0, 10), // Top 10 keywords per genre
+      }));
   }
 
   // Method to retrieve all games

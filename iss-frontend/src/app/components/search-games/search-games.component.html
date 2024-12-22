@@ -23,10 +23,23 @@
     <ul class="space-y-4">
       <li
         *ngFor="let result of searchResults"
-        class="p-4 border rounded-lg hover:shadow-md"
+        class="p-4 border rounded-lg hover:shadow-md flex justify-between"
       >
-        <h3 class="text-lg font-bold">{{ result.title }}</h3>
-        <p class="text-sm text-gray-600">{{ result.description }}</p>
+        <div>
+          <img
+          *ngIf="result.iconUrl"
+          [src]="result.iconUrl"
+          alt="{{ result.title }}"
+          class="w-16 h-16 mr-4 rounded-lg"
+        />
+          <h2 class="text-lg font-bold">{{ result.title }} ({{ result.rating }})</h2>
+          <p class="text-sm text-gray-600">{{ result.description }}</p>
+        </div>
+        <div>
+          <span class="bg-green-200 text-green-700 text-sm px-2 py-1 rounded">
+            {{ result.genre }}
+          </span>
+        </div>
       </li>
     </ul>
   </div>

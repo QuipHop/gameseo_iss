@@ -1,38 +1,65 @@
-<div class="statistics-container">
-    <h2>Top 500 Keywords</h2>
-  
-    <!-- Display the bar chart if there are top keywords -->
+<div class="statistics-container bg-gray-100 p-8">
+  <h2 class="text-3xl font-bold mb-6 text-center">Statistics</h2>
+
+  <!-- Top 500 Keywords Section -->
+  <section class="mb-12">
+    <h3 class="text-2xl font-semibold mb-4">Top 500 Keywords</h3>
+
+    <!-- Top Keywords Chart -->
     <div *ngIf="topKeywords.length > 0">
-      <div class="chart-container">
+      <div class="chart-container bg-white p-6 rounded-lg shadow-lg">
         <canvas baseChart
                 [data]="chartData"
                 [options]="chartOptions"
                 chartType="bar">
         </canvas>
       </div>
-    
-      <!-- Display the table below the chart -->
-      <div class="table-container">
-        <table>
-          <thead>
+
+        <!-- Top Keywords by Genre Section -->
+      <section>
+        <h3 class="text-2xl font-semibold mb-4">Top Keywords by Genre</h3>
+
+        <div class="genre-charts grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+          <div
+            *ngFor="let genre of genreKeywords"
+            class="p-6 bg-white rounded-lg shadow-lg"
+          >
+            <h4 class="text-lg font-bold mb-4">{{ genre.genre }}</h4>
+            <div class="chart-container">
+              <canvas baseChart
+                      [data]="genre.chartData"
+                      [options]="chartOptions"
+                      chartType="bar">
+              </canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Top Keywords Table -->
+      <div class="table-container mt-6 bg-white p-4 rounded-lg shadow-lg">
+        <table class="w-full border-collapse">
+          <thead class="bg-gray-200">
             <tr>
-              <th>Keyword</th>
-              <th>Count of Games</th>
+              <th class="text-left px-4 py-2 font-medium">Keyword</th>
+              <th class="text-left px-4 py-2 font-medium">Count of Games</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let keyword of topKeywords">
-              <td>{{ keyword.term }}</td>
-              <td>{{ keyword.count }}</td>
+            <tr
+              *ngFor="let keyword of topKeywords"
+              class="even:bg-gray-100 hover:bg-gray-50"
+            >
+              <td class="px-4 py-2">{{ keyword.term }}</td>
+              <td class="px-4 py-2">{{ keyword.count }}</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-  
-    <!-- Show message if no data available -->
-    <div *ngIf="topKeywords.length === 0">
+
+    <div *ngIf="topKeywords.length === 0" class="text-center text-gray-500 mt-4">
       <p>No data available.</p>
     </div>
-  </div>
-  
+  </section>
+</div>

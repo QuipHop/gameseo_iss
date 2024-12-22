@@ -9,4 +9,9 @@ export class StatisticsController {
   async getTopKeywords() {
     return this.scrapingService.getTopKeywords();
   }
+
+  @Get('/top-keywords-by-genre')
+  async getTopKeywordsByGenre() {
+    return this.scrapingService.getTopKeywordsByGenre();
+  }
 }
