@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,121 +16,28 @@ export class ScrapingService {
     private readonly termRepository: Repository<Term>,
   ) {}
 
-  async scrapeAndSaveGameData(url: string): Promise<Game> {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+  // Helper function to validate and format the URL
+  validateAndFormatUrl(url: string): string {
+    const playStoreRegex =
+      /^https:\/\/play\.google\.com\/store\/apps\/details\?id=([a-zA-Z0-9._-]+)$/;
 
-    try {
-      await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-      // Scrape game data
-      const gameData = await page.evaluate(() => {
-        const getItemProp = (selector) =>
-          document
-            .querySelector(`[itemprop="${selector}"]`)
-            ?.textContent?.trim() || null;
-
-        const getAllItemProps = (selector) => {
-          return Array.from(
-            document.querySelectorAll(`[itemprop="${selector}"]`),
-          )
-            .map((el) => el.textContent?.trim())
-            .filter(Boolean); // Remove empty or null values
-        };
-
-        const getDescription = () => {
-          return (
-            document
-              .querySelector('[data-g-id="description"]')
-              ?.textContent?.trim() || 'No description available'
-          );
-        };
-
-        return {
-          title: getItemProp('name'),
-          description: getDescription(),
-          genres: getAllItemProps('genre'),
-        };
-      });
-
-      const parsedData = {
-        title: gameData.title || 'N/A',
-        description: gameData.description || 'N/A',
-        genres: gameData.genres || [],
-      };
-
-      // Check if the game already exists
-      let game = await this.gameRepository.findOne({
-        where: { title: parsedData.title },
-        relations: ['terms'], // Load terms to remove existing links
-      });
-
-      if (game) {
-        // Update existing game
-        game.description = parsedData.description;
-        game.genre = parsedData.genres;
-        game = await this.gameRepository.save(game);
-
-        // Explicitly remove all term links
-        await this.gameRepository
-          .createQueryBuilder()
-          .relation(Game, 'terms')
-          .of(game)
-          .remove(game.terms); // Fully remove existing links
-      } else {
-        // Create a new game if it doesn't exist
-        game = this.gameRepository.create({
-          title: parsedData.title,
-          description: parsedData.description,
-          genre: parsedData.genres,
-        });
-        game = await this.gameRepository.save(game);
-      }
-
-      // Tokenize and save terms (title + description + genres) with stop word filtering
-      const tokens = [
-        ...advancedTokenizeContent(parsedData.title),
-        ...advancedTokenizeContent(parsedData.description),
-        ...parsedData.genres, // Add genres directly as terms
-      ];
-
-      console.log('Tokens to save:', tokens); // Log the tokens
-
-      // Save terms and link to the game
-      for (const token of tokens) {
-        let term = await this.termRepository.findOne({
-          where: { term: token },
-        });
-
-        if (!term) {
-          // Insert new term
-          term = this.termRepository.create({ term: token });
-          term = await this.termRepository.save(term);
-          console.log(`Inserted term: ${token}`); // Log inserted terms
-        }
-
-        // Check if the term is already linked to the game
-        const isAlreadyLinked = await this.gameRepository
-          .createQueryBuilder()
-          .relation(Game, 'terms')
-          .of(game)
-          .loadMany();
-
-        if (!isAlreadyLinked.find((linkedTerm) => linkedTerm.id === term.id)) {
-          // Add the term if not already linked
-          await this.gameRepository
-            .createQueryBuilder()
-            .relation(Game, 'terms')
-            .of(game)
-            .add(term);
-          console.log(`Linked term: ${token} to game: ${game.title}`); // Log linked terms
-        }
-      }
-
-      return game;
-    } finally {
-      await browser.close();
+    // Check if the URL matches the expected format
+    const match = url.match(playStoreRegex);
+    if (!match) {
+      throw new BadRequestException(
+        'Invalid URL. It must start with "https://play.google.com/store/apps/details?id=" followed by a valid app ID.',
+      );
     }
+
+    // Extract the app ID from the URL
+    // const appId = match[1];
+
+    // Ensure `hl=en` is present
+    if (!url.includes('&hl=en')) {
+      url += '&hl=en';
+    }
+
+    return url;
   }
 
   // Search function
@@ -160,6 +67,167 @@ export class ScrapingService {
       .getMany();
 
     return games;
+  }
+
+  async scrapeAndSaveGameData(url: string): Promise<Game> {
+    // Validate and format the URL
+    const formattedUrl = this.validateAndFormatUrl(url);
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    try {
+      // Navigate to the URL
+      await page.goto(formattedUrl, { waitUntil: 'domcontentloaded' });
+
+      // Verify the loaded URL
+      const currentUrl = await page.url();
+      console.log('Navigated to URL:', currentUrl);
+
+      if (currentUrl !== formattedUrl) {
+        throw new Error(
+          `Navigation error. Expected: ${formattedUrl}, but got: ${currentUrl}`,
+        );
+      }
+
+      // Scrape game data
+      const gameData = await page.evaluate(() => {
+        const getItemProp = (selector) =>
+          document
+            .querySelector(`[itemprop="${selector}"]`)
+            ?.textContent?.trim() || null;
+
+        const getAllItemProps = (selector) => {
+          return Array.from(
+            document.querySelectorAll(`[itemprop="${selector}"]`),
+          )
+            .map((el) => el.textContent?.trim())
+            .filter(Boolean); // Remove empty or null values
+        };
+
+        const getDescription = () => {
+          return (
+            document
+              .querySelector('[data-g-id="description"]')
+              ?.textContent?.trim() || 'No description available'
+          );
+        };
+
+        const getIconUrl = () => {
+          // Select the meta tag with property="og:image"
+          const metaIconElement = document.querySelector(
+            'meta[property="og:image"]',
+          );
+
+          // If the meta tag is found, return its "content" attribute
+          if (metaIconElement) {
+            return metaIconElement.getAttribute('content');
+          }
+
+          // If not found, return null
+          return null;
+        };
+
+        const getRating = () => {
+          const starRatingElement = document.querySelector(
+            '[itemprop="starRating"]',
+          );
+          return starRatingElement?.textContent?.match(/[\d.]+/)?.[0] || null;
+        };
+
+        return {
+          title: getItemProp('name'),
+          description: getDescription(),
+          genres: getAllItemProps('genre'),
+          iconUrl: getIconUrl(),
+          rating: getRating(),
+        };
+      });
+
+      console.log('Extracted game data:', gameData);
+
+      const parsedData = {
+        title: gameData.title || 'N/A',
+        description: gameData.description || 'N/A',
+        genres: gameData.genres || [],
+        iconUrl: gameData.iconUrl || null,
+        rating: parseFloat(gameData.rating) || null,
+      };
+
+      if (!parsedData.iconUrl) {
+        console.warn('Icon URL is missing or invalid');
+      }
+
+      // Check if the game already exists by title or URL
+      let game = await this.gameRepository.findOne({
+        where: [{ title: parsedData.title }, { url: formattedUrl }],
+        relations: ['terms'], // Load terms to remove existing links
+      });
+
+      if (game) {
+        // Update the existing game
+        game.description = parsedData.description;
+        game.genre = parsedData.genres;
+        game.iconUrl = parsedData.iconUrl; // Update iconUrl
+        game.rating = parsedData.rating; // Save rating
+        game = await this.gameRepository.save(game);
+
+        // Explicitly remove all term links
+        await this.gameRepository
+          .createQueryBuilder()
+          .relation(Game, 'terms')
+          .of(game)
+          .remove(game.terms); // Fully remove existing links
+      } else {
+        // Create a new game if it doesn't exist
+        game = this.gameRepository.create({
+          title: parsedData.title,
+          description: parsedData.description,
+          url: formattedUrl,
+          genre: parsedData.genres,
+          iconUrl: parsedData.iconUrl, // Save iconUrl
+          rating: parsedData.rating, // Save rating
+        });
+        game = await this.gameRepository.save(game);
+      }
+
+      // Tokenize and save terms (title + description + genres) with stop word filtering
+      const tokens = [
+        ...advancedTokenizeContent(parsedData.title),
+        ...advancedTokenizeContent(parsedData.description),
+        ...parsedData.genres, // Add genres directly as terms
+      ];
+
+      for (const token of tokens) {
+        let term = await this.termRepository.findOne({
+          where: { term: token },
+        });
+
+        if (!term) {
+          term = this.termRepository.create({ term: token });
+          term = await this.termRepository.save(term);
+        }
+
+        // Link the term to the game
+        const isAlreadyLinked = await this.gameRepository
+          .createQueryBuilder()
+          .relation(Game, 'terms')
+          .of(game)
+          .loadMany();
+
+        if (!isAlreadyLinked.find((linkedTerm) => linkedTerm.id === term.id)) {
+          await this.gameRepository
+            .createQueryBuilder()
+            .relation(Game, 'terms')
+            .of(game)
+            .add(term);
+        }
+      }
+
+      return game;
+    } finally {
+      await browser.close();
+    }
   }
 
   // In ScrapingService or a separate statistics service

@@ -1,11 +1,21 @@
-<nav class="tabs">
-  <a class="tab" routerLink="/scrape" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Scrape Game</a>
-  <a class="tab" routerLink="/games" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Game List</a>
-  <a class="tab" routerLink="/search" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Search Games</a>
-  <a class="tab" routerLink="/statistics" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Statistics</a> <!-- New Tab -->
-</nav>
+<div class="min-h-screen bg-gray-100 text-gray-900">
+  <header class="bg-blue-600 text-white shadow-lg">
+    <nav class="container mx-auto p-4">
+      <ul class="flex justify-between">
+        <li>
+          <a routerLink="/" class="text-lg font-bold hover:text-gray-200">GameSEO</a>
+        </li>
+        <li class="space-x-4">
+          <a routerLink="/scrape" class="hover:text-gray-200">Scrape</a>
+          <a routerLink="/games" class="hover:text-gray-200">Games</a>
+          <a routerLink="/search" class="hover:text-gray-200">Search</a>
+          <a routerLink="/statistics" class="hover:text-gray-200">Statistics</a>
+        </li>
+      </ul>
+    </nav>
+  </header>
 
-<!-- Route Outlet -->
-<div class="content">
-  <router-outlet></router-outlet>
+  <main class="container mx-auto p-8">
+    <router-outlet></router-outlet>
+  </main>
 </div>

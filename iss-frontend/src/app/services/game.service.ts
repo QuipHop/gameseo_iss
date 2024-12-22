@@ -10,6 +10,7 @@ export interface Game {
   description: string;
   releaseDate: string;
   genre: string[];
+  iconUrl: string;
 }
 
 @Injectable({

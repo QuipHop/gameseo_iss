@@ -15,6 +15,7 @@ export class ScrapingController {
   // Endpoint to scrape a new game and save it
   @Post('scrape')
   async scrapeGame(@Body('url') url: string): Promise<Game> {
+    console.log('url', url);
     return await this.scrapingService.scrapeAndSaveGameData(url);
   }
 

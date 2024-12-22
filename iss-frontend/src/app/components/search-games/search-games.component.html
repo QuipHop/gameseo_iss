@@ -1,43 +1,33 @@
-<div class="search-container">
-    <h2>Search Games</h2>
-  
-    <!-- Search Form -->
-    <form (ngSubmit)="onSearch()">
-      <label>
-        Search:
-        <input
-          type="text"
-          [(ngModel)]="searchQuery"
-          name="query"
-          placeholder="Enter keywords..."
-        />
-      </label>
-      <button type="submit">Search</button>
-    </form>
-  
-    <!-- Search Results -->
-    <div *ngIf="searchResults && searchResults.length > 0">
-      <h3>Results:</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Genres</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let game of searchResults">
-            <td>{{ game.title }}</td>
-            <td>{{ game.description }}</td>
-            <td>{{ game.genre }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  
-    <div *ngIf="searchResults?.length === 0">
-      <p>No results found.</p>
-    </div>
+<div class="bg-white p-6 rounded-lg shadow-lg">
+  <h1 class="text-2xl font-bold mb-4">Search Games</h1>
+  <form (submit)="onSearch()">
+    <label for="query" class="block text-lg mb-2">Search Query</label>
+    <input
+      id="query"
+      type="text"
+      class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+      [(ngModel)]="searchQuery"
+      [ngModelOptions]="{standalone: true}"
+      placeholder="Enter search query"
+    />
+    <button
+      type="submit"
+      class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
+    >
+      Search
+    </button>
+  </form>
+
+  <div *ngIf="searchResults.length > 0" class="mt-6">
+    <h2 class="text-xl font-bold mb-4">Search searchResults</h2>
+    <ul class="space-y-4">
+      <li
+        *ngFor="let result of searchResults"
+        class="p-4 border rounded-lg hover:shadow-md"
+      >
+        <h3 class="text-lg font-bold">{{ result.title }}</h3>
+        <p class="text-sm text-gray-600">{{ result.description }}</p>
+      </li>
+    </ul>
   </div>
-  
+</div>

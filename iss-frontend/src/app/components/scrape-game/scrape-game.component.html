@@ -1,13 +1,49 @@
-<h2>Scrape a New Game</h2>
-<input type="text" [(ngModel)]="gameUrl" placeholder="Enter game URL" />
-<button (click)="onScrapeGame()">Scrape Game</button>
+<div class="bg-white p-6 rounded-lg shadow-lg">
+  <!-- Form to scrape a game -->
+  <h1 class="text-2xl font-bold mb-4">Scrape a New Game</h1>
+  <form (submit)="onScrapeGame()">
+    <label for="gameUrl" class="block text-lg mb-2">Game URL</label>
+    <input
+      id="gameUrl"
+      type="text"
+      class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+      [(ngModel)]="gameUrl"
+      name="gameUrl"
+      placeholder="Enter game URL"
+    />
+    <button
+      type="submit"
+      class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
+    >
+      Scrape
+    </button>
+  </form>
 
-<div *ngIf="scrapedGame">
-  <h3>Scraped Game Details</h3>
-  <p><strong>Title:</strong> {{ scrapedGame.title }}</p>
-  <!-- <p><strong>Category:</strong> {{ scrapedGame.category }}</p> -->
-  <p><strong>Rating:</strong> {{ scrapedGame.rating }}</p>
-  <p><strong>Genre:</strong> {{ scrapedGame.genre.toString() }}</p>
-  <p><strong>Description:</strong> {{ scrapedGame.description }}</p>
-  <!-- <p><strong>Release Date:</strong> {{ scrapedGame?.releaseDate | date }}</p> -->
+  <!-- Display the scraped game details -->
+  <div *ngIf="scrapedGame" class="mt-6">
+    <h2 class="text-xl font-bold mb-4">Scraped Game Details</h2>
+    <div class="flex items-start">
+      <!-- Game icon -->
+      <img
+        [src]="scrapedGame.iconUrl"
+        alt="{{ scrapedGame.title }} Icon"
+        class="w-24 h-24 rounded-lg mr-4 object-cover border border-gray-300"
+      />
+      <!-- Game details -->
+      <div>
+        <p class="text-lg font-semibold">
+          <strong>Title:</strong> {{ scrapedGame.title }}
+        </p>
+        <p class="text-gray-700">
+          <strong>Genre:</strong> {{ scrapedGame.genre.toString() }}
+        </p>
+        <p class="text-gray-700">
+          <strong>Rating:</strong> {{ scrapedGame.rating || 'N/A' }}
+        </p>
+        <p class="text-gray-700">
+          <strong>Description:</strong> {{ scrapedGame.description }}
+        </p>
+      </div>
+    </div>
+  </div>
 </div>

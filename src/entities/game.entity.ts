@@ -1,9 +1,9 @@
 import {
-  Column,
   Entity,
-  JoinTable,
-  ManyToMany,
+  Column,
   PrimaryGeneratedColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { Term } from './term.entity';
 
@@ -15,16 +15,22 @@ export class Game {
   @Column()
   title: string;
 
-  @Column('text')
+  @Column({ type: 'float', nullable: true, default: 0 })
+  rating: number;
+
+  @Column({ nullable: true })
   description: string;
 
-  @Column({ type: 'simple-array', nullable: true })
+  @Column('simple-array', { nullable: true })
   genre: string[];
 
-  @Column({ type: 'date', nullable: true })
-  releaseDate: Date;
+  @Column({ nullable: true })
+  url: string;
+
+  @Column({ nullable: true })
+  iconUrl: string;
 
   @ManyToMany(() => Term, (term) => term.games, { cascade: true })
-  @JoinTable()
+  @JoinTable() // This defines the join table for the ManyToMany relationship
   terms: Term[];
 }

@@ -1,4 +1,4 @@
-<h2>Game List</h2>
+<!-- <h2>Game List</h2>
 <table>
   <tr>
     <th>Title</th>
@@ -14,4 +14,30 @@
     <td>{{ game.description }}</td>
     <td>{{ game.releaseDate | date }}</td>
   </tr>
-</table>
+</table> -->
+<div class="bg-white p-6 rounded-lg shadow-lg">
+  <h1 class="text-2xl font-bold mb-4">Game List</h1>
+  <ul class="space-y-4">
+    <li
+      *ngFor="let game of games"
+      class="p-4 border rounded-lg hover:shadow-md flex justify-between"
+    >
+      <div>
+        <img
+        *ngIf="game.iconUrl"
+        [src]="game.iconUrl"
+        alt="{{ game.title }}"
+        class="w-16 h-16 mr-4 rounded-lg"
+      />
+        <h2 class="text-lg font-bold">{{ game.title }} ({{ game.rating }})</h2>
+        <p class="text-sm text-gray-600">{{ game.description }}</p>
+      </div>
+      <div>
+        <span class="bg-green-200 text-green-700 text-sm px-2 py-1 rounded">
+          {{ game.genre }}
+        </span>
+      </div>
+    </li>
+  </ul>
+</div>
+
