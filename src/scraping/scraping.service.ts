@@ -41,7 +41,6 @@ export class ScrapingService {
     console.log('Validated and formatted URL:', formattedUrl);
     return formattedUrl;
   }
-
   // Search function
   async searchGames(query: string): Promise<Game[]> {
     // Tokenize the query
@@ -59,13 +58,23 @@ export class ScrapingService {
       return []; // No matching terms found
     }
 
-    // Retrieve games linked to these terms
+    // Retrieve games linked to these terms and calculate relevance
     const games = await this.gameRepository
       .createQueryBuilder('game')
-      .innerJoin('game.terms', 'term')
+      .leftJoinAndSelect('game.terms', 'term')
+      .addSelect(
+        `
+      SUM(
+        CASE 
+          WHEN term.id IN (:...termIds) THEN 2 -- Higher weight for term matches
+          ELSE 0
+        END
+      )`,
+        'relevance',
+      )
       .where('term.id IN (:...termIds)', { termIds })
       .groupBy('game.id')
-      .orderBy('COUNT(term.id)', 'DESC') // Order by the number of matches
+      .orderBy('relevance', 'DESC')
       .getMany();
 
     return games;
